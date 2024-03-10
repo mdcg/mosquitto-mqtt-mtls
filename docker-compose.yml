@@ -1,0 +1,15 @@
+version: "3.7"
+services:
+  broker:
+    container_name: mqtt-broker-mtls
+    build: 
+      context: .
+      dockerfile: dockerfiles/broker.Dockerfile
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    restart: unless-stopped
+
+networks:
+  default:
+    name: mqtt-network
