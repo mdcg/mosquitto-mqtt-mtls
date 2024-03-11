@@ -1,13 +1,15 @@
+import logging
+import os
+import sys
 import time
+from random import randint
 
 import paho.mqtt.client as mqtt
-from random import randint
-import logging
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 handler = logging.StreamHandler()
-handler.setFormatter(
+handler.setFormatter( 
     logging.Formatter(
         fmt="[publisher] %(asctime)s - %(levelname)s : %(message)s",
         datefmt="%d/%m/%Y %I:%M:%S %p",
@@ -16,11 +18,18 @@ handler.setFormatter(
 logger.addHandler(handler)
 
 
+def check_file_exists(*args):
+    for file_path in args:
+        if not os.path.exists(file_path):
+            print(f"File {file_path} does not exist.")
+            sys.exit(1)
+
+
 def on_publish(client, userdata, mid, reason_code, properties):
     try:
         userdata.remove(mid)
     except KeyError:
-        print(
+        logger.error(
             """
         on_publish() is called with a mid not present in unacked_publish
         This is due to an unavoidable race-condition:
@@ -34,19 +43,22 @@ def on_publish(client, userdata, mid, reason_code, properties):
         but remember that mid could be re-used !
         """
         )
+        return None
 
     logger.info("Message sent successfully.")
 
 
-def main():
+def main(ca_certificate, publisher_certificate, publisher_key, hostname):
+    check_file_exists(ca_certificate, publisher_certificate, publisher_key)
+
     unacked_publish = set()
 
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
-    client.tls_set(ca_certs="ca.crt", certfile="pub.crt", keyfile="pub.key")
+    client.tls_set(ca_certs=ca_certificate, certfile=publisher_certificate, keyfile=publisher_key)
     client.on_publish = on_publish
     client.user_data_set(unacked_publish)
 
-    client.connect("localhost", 1883, 60)
+    client.connect(hostname, 1883, 60)
 
     client.loop_start()
 
@@ -60,4 +72,10 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        ca_certificate, publisher_certificate, publisher_key, hostname = sys.argv[1:]
+    except IndexError:
+        print("Usage: python publisher.py <ca_certificate> <publisher_certificate> <publisher_key> <hostname>")
+        sys.exit(1)
+
+    main(ca_certificate, publisher_certificate, publisher_key, hostname)

@@ -1,13 +1,25 @@
 version: "3.7"
 services:
-  broker:
-    container_name: mqtt-broker-mtls
+  mqttbroker:
+    container_name: mqttbroker-mtls
     build: 
       context: .
       dockerfile: dockerfiles/broker.Dockerfile
     ports:
       - "1883:1883"
       - "9001:9001"
+    restart: unless-stopped
+  publisher:
+    container_name: publisher-mtls
+    build: 
+      context: .
+      dockerfile: dockerfiles/publisher.Dockerfile
+    restart: unless-stopped
+  subscriber:
+    container_name: subscriber-mtls
+    build: 
+      context: .
+      dockerfile: dockerfiles/subscriber.Dockerfile
     restart: unless-stopped
 
 networks:
