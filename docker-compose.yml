@@ -5,9 +5,8 @@ services:
     build: 
       context: .
       dockerfile: dockerfiles/broker.Dockerfile
-    ports:
-      - "1883:1883"
-      - "9001:9001"
+    hostname: mqttbroker
+    network_mode: host
     restart: unless-stopped
   publisher:
     container_name: publisher-mtls
@@ -22,6 +21,3 @@ services:
       dockerfile: dockerfiles/subscriber.Dockerfile
     restart: unless-stopped
 
-networks:
-  default:
-    name: mqtt-network

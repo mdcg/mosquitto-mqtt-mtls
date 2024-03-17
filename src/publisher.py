@@ -58,12 +58,12 @@ def main(ca_certificate, publisher_certificate, publisher_key, hostname):
     client.on_publish = on_publish
     client.user_data_set(unacked_publish)
 
-    client.connect(hostname, 1883, 60)
+    client.connect(hostname, 8883, 60)
 
     client.loop_start()
 
     while True:
-        msg_info = client.publish("/test/mTLS", f"{randint(10, 999)}", qos=1)
+        msg_info = client.publish("test/mTLS", f"{randint(10, 999)}", qos=1)
         unacked_publish.add(msg_info.mid)
         while len(unacked_publish):
             time.sleep(0.1)

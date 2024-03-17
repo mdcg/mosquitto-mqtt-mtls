@@ -25,7 +25,7 @@ def check_file_exists(*args):
 
 def on_connect(client, userdata, flags, reason_code, properties):
     logger.info(f"Connected with result code: {str(reason_code)}")
-    client.subscribe("/test/mTLS")
+    client.subscribe("test/mTLS")
 
 
 def on_message(client, userdata, msg):
@@ -38,7 +38,7 @@ def main(ca_certificate, subscriber_certificate, subscriber_key, hostname):
     client.on_connect = on_connect
     client.on_message = on_message
 
-    client.connect(hostname, 1883, 60)
+    client.connect(hostname, 8883, 60)
 
     client.loop_forever()
 
