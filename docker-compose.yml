@@ -13,11 +13,16 @@ services:
     build: 
       context: .
       dockerfile: dockerfiles/publisher.Dockerfile
+    network_mode: host
     restart: unless-stopped
+    depends_on:
+      - mqttbroker
   subscriber:
     container_name: subscriber-mtls
     build: 
       context: .
       dockerfile: dockerfiles/subscriber.Dockerfile
+    network_mode: host
     restart: unless-stopped
-
+    depends_on:
+      - mqttbroker
