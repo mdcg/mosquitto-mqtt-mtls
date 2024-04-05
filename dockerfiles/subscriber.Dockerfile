@@ -18,7 +18,7 @@ RUN apt-get install -y openssl
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-CMD python subscriber.py ca.crt subscriber.crt subscriber.key localhost
+CMD python subscriber.py ca.crt subscriber.crt subscriber.key andre.local
 # CMD tail -f /dev/null
 # Caso o servidor MQTT tenha um certificado gerado usando SAN:
 # CMD python subscriber.py ca.crt subscriber.crt subscriber.key 192.168.1.11
