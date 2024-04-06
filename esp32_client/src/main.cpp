@@ -1,43 +1,46 @@
 #include <Arduino.h>
-#include <MQTT.h>
+#include <MQTTClient.h>
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 
-const char ssid[] = "YOURSSID";
-const char pass[] = "YOURPASSWORD";
+const char ssid[] = "<network>";
+const char pass[] = "<password>";
 
-const char* serverCA = R"EOF(-----BEGIN CERTIFICATE-----
-YOUR CA CERT
+const char *serverCA = R"EOF(-----BEGIN CERTIFICATE-----
+<CA - Certificate>
 -----END CERTIFICATE-----)EOF";
 
-const char* clientCert = R"KEY(-----BEGIN CERTIFICATE-----
-YOUR CLIENT CERT
+const char *clientCert = R"KEY(-----BEGIN CERTIFICATE-----
+<ESP32 - Certificate>
 -----END CERTIFICATE-----)KEY";
 
-const char* clientKey = R"KEY(-----BEGIN RSA PRIVATE KEY-----
-YOUR CLIENT KEY
------END RSA PRIVATE KEY-----)KEY";
+const char *clientKey = R"KEY(-----BEGIN PRIVATE KEY-----
+<ESP32 - KEY>
+-----END PRIVATE KEY-----)KEY";
 
 WiFiClientSecure net;
 MQTTClient client;
 
 unsigned long lastMillis = 0;
 
-void messageReceived(String& topic, String& payload) {
+void messageReceived(String &topic, String &payload)
+{
   /**
    * MQTT Client message recived callback.
    */
   Serial.println("incoming: " + topic + " - " + payload);
 }
 
-void setup() {
+void setup()
+{
   Serial.begin(115200);
 
   // Connect to the WiFi
   WiFi.begin(ssid, pass);
 
   Serial.print("Checking wifi...");
-  while (WiFi.status() != WL_CONNECTED) {
+  while (WiFi.status() != WL_CONNECTED)
+  {
     Serial.print(".");
     delay(1000);
   }
@@ -58,7 +61,8 @@ void setup() {
   client.onMessage(messageReceived);
 
   // Connect to the mqtt broker
-  while (!client.connect("myclient", "public", "public")) {
+  while (!client.connect("myclient", "public", "public"))
+  {
     Serial.print(".");
     delay(1000);
   }
@@ -66,16 +70,19 @@ void setup() {
   Serial.println("connected!");
 
   // Subscribe to the relevant topics
-  client.subscribe("/test");
+  client.subscribe("test/mTLS");
 }
 
-void loop() {
+void loop()
+{
   // Run the mqtt client loop (handles recived messages - runs keep alive)
   client.loop();
 
   // Check that client is still connected - if not reconnect
-  if (!client.connected()) {
-    while (!client.connect("myclient", "public", "public")) {
+  if (!client.connected())
+  {
+    while (!client.connect("myclient", "public", "public"))
+    {
       Serial.print(".");
       delay(1000);
     }
@@ -83,8 +90,9 @@ void loop() {
   }
 
   // Publish a message to a topic every second
-  if (millis() - lastMillis > 10000) {
+  if (millis() - lastMillis > 10000)
+  {
     lastMillis = millis();
-    client.publish("/test", "hello world");
+    client.publish("test/mTLS", "hello world");
   }
 }
